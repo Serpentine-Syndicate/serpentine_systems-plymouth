@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Serpentine Systems
+Description=A monochrome theme featuring bouncing text and snake game
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/serpentine
+ScriptFile=/usr/share/plymouth/themes/serpentine/serpentine.script 
