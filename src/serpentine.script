@@ -1,31 +1,39 @@
-// Screen setup
-Window.SetBackgroundTopColor(0, 0, 0);
-Window.SetBackgroundBottomColor(0, 0, 0);
-
-// Get screen dimensions
+// Screen size and center position
 screen_width = Window.GetWidth();
 screen_height = Window.GetHeight();
+screen_x = Window.GetX();
+screen_y = Window.GetY();
 
-// Calculate center position for 800x800 content area
+// Calculate center position for 800x800 content
 content_width = 800;
 content_height = 800;
 content_x = (screen_width - content_width) / 2;
 content_y = (screen_height - content_height) / 2;
 
-// Text setup
-text = "serpentine systems";
-text_image = Image.Text(text, 1, 1, 1); // White text
-text_sprite = Sprite(text_image);
-text_sprite.SetPosition(content_x + content_width/2 - text_image.GetWidth()/2, content_y + 50);
+// Create background
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
 
-// Animation state
-bounce_height = 20;
-bounce_speed = 0.1;
+// Text properties
+text = "serpentine systems";
+text_image = Image.Text(text, 1, 1, 1); // White text (RGB: 1,1,1)
+text_sprite = Sprite(text_image);
+
+// Initialize text position
+text_x = content_x + (content_width - text_image.GetWidth()) / 2;
+text_y = content_y + 100;
+text_sprite.SetPosition(text_x, text_y);
+
+// Animation variables
+bounce_height = 50;
+bounce_speed = 0.5;
 time = 0;
 
 fun refresh_callback() {
-    time += bounce_speed;
-    text_sprite.SetY(content_y + 50 + Math.Sin(time) * bounce_height);
+    // Bounce animation for text
+    time = time + bounce_speed;
+    new_y = text_y + Math.Sin(time) * bounce_height;
+    text_sprite.SetPosition(text_x, new_y);
 }
 
 Plymouth.SetRefreshFunction(refresh_callback); 
