@@ -105,7 +105,11 @@
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s@/usr/@$out/@" "$file"
+              # Update the ImageDir and ScriptFile paths
+              sed -i \
+                -e "s|ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-rings|" \
+                -e "s|ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-rings/serpentine-rings.script|" \
+                "$file"
             done
 
             runHook postInstall
@@ -144,12 +148,13 @@
             # Copy generated animations
             cp -r $animations/* $out/share/plymouth/themes/serpentine-static/
 
-            # Fix paths in plymouth theme files - modified to handle paths correctly
+            # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              # First, fix the /usr/ paths
-              sed -i "s@/usr/@$out/@" "$file"
-              # Then fix any double themes/themes paths
-              sed -i "s@themes/themes/@themes/@g" "$file"
+              # Update the ImageDir and ScriptFile paths
+              sed -i \
+                -e "s|ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-static|" \
+                -e "s|ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-static/serpentine-static.script|" \
+                "$file"
             done
 
             runHook postInstall
@@ -182,7 +187,7 @@
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s@/usr/@$out/@" "$file"
+              sed -i "s|/usr/|$out/|" "$file"
             done
 
             runHook postInstall
