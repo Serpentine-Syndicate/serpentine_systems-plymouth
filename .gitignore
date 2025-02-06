@@ -1,5 +1,5 @@
 references/
 .plymouth-test/
-result
+result/
 !resources/.gitkeep
 progress-*
