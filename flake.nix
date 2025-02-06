@@ -144,9 +144,12 @@
             # Copy generated animations
             cp -r $animations/* $out/share/plymouth/themes/serpentine-static/
 
-            # Fix paths in plymouth theme files
+            # Fix paths in plymouth theme files - modified to handle paths correctly
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
+              # First, fix the /usr/ paths
               sed -i "s@/usr/@$out/@" "$file"
+              # Then fix any double themes/themes paths
+              sed -i "s@themes/themes/@themes/@g" "$file"
             done
 
             runHook postInstall
