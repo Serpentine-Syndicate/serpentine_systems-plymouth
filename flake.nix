@@ -19,23 +19,35 @@
           pname = "plymouth-theme-serpentine";
           version = "0.1.0";
 
-          src = ./.;
+          src = ./src;
 
-          buildInputs = with pkgs; [
-            plymouth
-          ];
+          nativeBuildInputs = [pkgs.gnused];
 
           installPhase = ''
-            mkdir -p $out/share/plymouth/themes/serpentine
-            cp -r src/* $out/share/plymouth/themes/serpentine/
-            cp -r resources/* $out/share/plymouth/themes/serpentine/
+            runHook preInstall
 
-            # Ensure proper permissions
-            chmod 644 $out/share/plymouth/themes/serpentine/*
+            mkdir -p $out/share/plymouth/themes/serpentine
+            cp -r $src/* $out/share/plymouth/themes/serpentine/
+
+            # Fix paths in plymouth theme files
+            for file in $out/share/plymouth/themes/serpentine/*.plymouth; do
+              sed -i "s@/usr/@$out/@" $file
+            done
+
+            runHook postInstall
           '';
+
+          meta = {
+            description = "Serpentine Systems Plymouth Theme";
+            longDescription = ''
+              A monochrome Plymouth theme for Serpentine Systems featuring
+              an animation with rotating rings and text.
+            '';
+            platforms = pkgs.lib.platforms.linux;
+          };
         };
 
-        # NixOS module for easy integration in VMs or real systems
+        # NixOS module for easy theme installation
         nixosModules.default = {
           config,
           lib,
@@ -44,79 +56,27 @@
         }: {
           boot.plymouth = {
             enable = true;
-            theme = "serpentine";
+            theme = "serpentine-rings";
+            themePackages = [self.packages.${system}.default];
           };
 
           environment.systemPackages = [self.packages.${system}.default];
         };
 
-        packages.test-vm =
-          (nixpkgs.lib.nixosSystem {
-            inherit system;
-            modules = [
-              self.nixosModules.${system}.default
-              ({pkgs, ...}: {
-                system.stateVersion = "23.11";
-
-                # Basic VM settings
-                virtualisation = {
-                  cores = 2;
-                  memorySize = 2048;
-                  graphics = true;
-                  resolution = {
-                    x = 1024;
-                    y = 768;
-                  }; # Set custom resolution
-                  qemu = {
-                    options = [
-                      "-vga virtio" # Better graphics performance
-                      "-display gtk,grab-on-hover=on" # Better mouse handling
-                    ];
-                  };
-                };
-
-                # Fast boot for quick testing
-                boot.loader.timeout = 0;
-                boot.kernelParams = ["plymouth.enable=1" "quiet" "splash"];
-
-                # Basic user setup
-                users.users.tester = {
-                  isNormalUser = true;
-                  extraGroups = ["wheel"];
-                  initialPassword = "test";
-                };
-              })
-            ];
-          })
-          .config
-          .system
-          .build
-          .vm;
-
+        # Development shell
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             plymouth
-            imagemagick # For image processing
-            gimp # For creating/editing theme assets
-            qemu # For running the VM
-            spice-gtk # For better VM display
+            processing
           ];
 
           shellHook = ''
             echo "Plymouth Theme Development Environment"
             echo ""
-            echo "To test in VM:"
-            echo "  nix build .#test-vm"
-            echo "  ./result/bin/run-*"
+            echo "Theme can be built with:"
+            echo "  nix build"
             echo ""
-            echo "VM Controls:"
-            echo "  Ctrl+Alt+G - Release mouse grab"
-            echo "  Ctrl+Alt+F - Toggle fullscreen"
-            echo "  Ctrl+Alt+Q - Quit VM"
-            echo ""
-            echo "The theme will be pre-installed in the VM."
-            echo "Username: tester"
-            echo "Password: test"
+            echo "Install in your NixOS configuration by importing this flake's nixosModules.default"
             echo ""
           '';
         };

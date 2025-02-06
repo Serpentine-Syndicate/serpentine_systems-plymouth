@@ -1,39 +1,106 @@
-// Screen size and center position
-screen_width = Window.GetWidth();
-screen_height = Window.GetHeight();
-screen_x = Window.GetX();
-screen_y = Window.GetY();
+## Author : olyn (00x29a)
+## Mail : olyn@siskiyoutech.net
+## Github : @00x29a
 
-// Calculate center position for 800x800 content
-content_width = 800;
-content_height = 800;
-content_x = (screen_width - content_width) / 2;
-content_y = (screen_height - content_height) / 2;
+// Screen size
+screen.w = Window.GetWidth(0);
+screen.h = Window.GetHeight(0);
+screen.half.w = Window.GetWidth(0) / 2;
+screen.half.h = Window.GetHeight(0) / 2;
 
-// Create background
-Window.SetBackgroundTopColor(0, 0, 0);
-Window.SetBackgroundBottomColor(0, 0, 0);
+// Question prompt
+question = null;
+answer = null;
 
-// Text properties
-text = "serpentine systems";
-text_image = Image.Text(text, 1, 1, 1); // White text (RGB: 1,1,1)
-text_sprite = Sprite(text_image);
+// Message
+message = null;
 
-// Initialize text position
-text_x = content_x + (content_width - text_image.GetWidth()) / 2;
-text_y = content_y + 100;
-text_sprite.SetPosition(text_x, text_y);
+// Password prompt
+bullets = null;
+prompt = null;
+bullet.image = Image.Text("*", 1, 1, 1);
 
-// Animation variables
-bounce_height = 50;
-bounce_speed = 0.5;
-time = 0;
+// Flow
+state.status = "play";
+state.time = 0.0;
 
-fun refresh_callback() {
-    // Bounce animation for text
-    time = time + bounce_speed;
-    new_y = text_y + Math.Sin(time) * bounce_height;
-    text_sprite.SetPosition(text_x, new_y);
+//--------------------------------- Refresh (Logo animation) --------------------------
+
+# cycle through all images
+for (i = 0; i < 1256; i++)
+  flyingman_image[i] = Image("progress-" + i + ".png");
+flyingman_sprite = Sprite();
+
+# set image position
+flyingman_sprite.SetX(Window.GetX() + (Window.GetWidth(0) / 2 - flyingman_image[0].GetWidth() / 2)); # Place images in the center
+flyingman_sprite.SetY(Window.GetY() + (Window.GetHeight(0) / 2 - flyingman_image[0].GetHeight() / 2));
+
+progress = 0;
+
+fun refresh_callback ()
+  {
+    flyingman_sprite.SetImage(flyingman_image[Math.Int(progress / 1) % 1256]);
+    progress++;
+  }
+  
+Plymouth.SetRefreshFunction (refresh_callback);
+
+//------------------------------------- Password prompt -------------------------------
+fun DisplayQuestionCallback(prompt, entry) {
+    question = null;
+    answer = null;
+
+    if (entry == "")
+        entry = "<answer>";
+
+    question.image = Image.Text(prompt, 1, 1, 1);
+    question.sprite = Sprite(question.image);
+    question.sprite.SetX(screen.half.w - question.image.GetWidth() / 2);
+    question.sprite.SetY(screen.h - 4 * question.image.GetHeight());
+
+    answer.image = Image.Text(entry, 1, 1, 1);
+    answer.sprite = Sprite(answer.image);
+    answer.sprite.SetX(screen.half.w - answer.image.GetWidth() / 2);
+    answer.sprite.SetY(screen.h - 2 * answer.image.GetHeight());
 }
+Plymouth.SetDisplayQuestionFunction(DisplayQuestionCallback);
 
-Plymouth.SetRefreshFunction(refresh_callback); 
+//------------------------------------- Password prompt -------------------------------
+fun DisplayPasswordCallback(nil, bulletCount) {
+    state.status = "pause";
+    totalWidth = bulletCount * bullet.image.GetWidth();
+    startPos = screen.half.w - totalWidth / 2;
+
+    prompt.image = Image.Text("Enter Password", 1, 1, 1);
+    prompt.sprite = Sprite(prompt.image);
+    prompt.sprite.SetX(screen.half.w - prompt.image.GetWidth() / 2);
+    prompt.sprite.SetY(screen.h - 4 * prompt.image.GetHeight());
+
+    // Clear all bullets (user might hit backspace)
+    bullets = null;
+    for (i = 0; i < bulletCount; i++) {
+        bullets[i].sprite = Sprite(bullet.image);
+        bullets[i].sprite.SetX(startPos + i * bullet.image.GetWidth());
+        bullets[i].sprite.SetY(screen.h - 2 * bullet.image.GetHeight());
+    }
+}
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+
+//--------------------------- Normal display (unset all text) ----------------------
+fun DisplayNormalCallback() {
+    state.status = "play";
+    bullets = null;
+    prompt = null;
+    message = null;
+    question = null;
+    answer = null;
+}
+Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
+
+//----------------------------------------- Message --------------------------------
+fun MessageCallback(text) {
+    message.image = Image.Text(text, 1, 1, 1);
+    message.sprite = Sprite(message.image);
+    message.sprite.SetPosition(screen.half.w - message.image.GetWidth() / 2, message.image.GetHeight());
+}
+Plymouth.SetMessageFunction(MessageCallback);
