@@ -53,11 +53,29 @@
           '');
         };
 
+        apps.build-serpentine-static = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "build-serpentine-static" ''
+            # Temporarily set isExporting to true
+            sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' themes/serpentine-static/sketch/sketch.pde
+            cd themes/serpentine-static && ${pkgs.xvfb-run}/bin/xvfb-run -a ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
+            # Reset isExporting back to false
+            sed -i 's/boolean isExporting = true;/boolean isExporting = false;/' themes/serpentine-static/sketch/sketch.pde
+          '');
+        };
+
         # Run options for previewing animations
         apps.serpentine-rings = {
           type = "app";
           program = toString (pkgs.writeShellScript "run-serpentine-rings" ''
             cd themes/serpentine-rings && ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
+          '');
+        };
+
+        apps.serpentine-static = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "run-serpentine-static" ''
+            cd themes/serpentine-static && ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
           '');
         };
 
@@ -103,6 +121,47 @@
           };
         };
 
+        packages.serpentine-static = pkgs.stdenv.mkDerivation {
+          pname = "plymouth-theme-serpentine-static";
+          version = "0.1.0";
+
+          src = ./themes/serpentine-static/plymouth;
+
+          # Build the animations first
+          animations = buildThemeAnimations "serpentine-static";
+
+          nativeBuildInputs = [pkgs.gnused];
+
+          installPhase = ''
+            runHook preInstall
+
+            # Create theme directory
+            mkdir -p $out/share/plymouth/themes/serpentine-static
+
+            # Copy theme files
+            cp -r $src/* $out/share/plymouth/themes/serpentine-static/
+
+            # Copy generated animations
+            cp -r $animations/* $out/share/plymouth/themes/serpentine-static/
+
+            # Fix paths in plymouth theme files
+            find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
+              sed -i "s@/usr/@$out/@" "$file"
+            done
+
+            runHook postInstall
+          '';
+
+          meta = {
+            description = "Serpentine Static Plymouth Theme";
+            longDescription = ''
+              A monochrome Plymouth theme featuring rotating Serpentine Systems text
+              with an organic static effect in the center.
+            '';
+            platforms = pkgs.lib.platforms.linux;
+          };
+        };
+
         # Collection package containing all themes
         packages.default = pkgs.stdenv.mkDerivation {
           pname = "plymouth-theme-serpentine";
@@ -143,13 +202,30 @@
           pkgs,
           ...
         }: {
-          boot.plymouth = {
-            enable = true;
-            theme = "serpentine-rings";
-            themePackages = [self.packages.${system}.serpentine-rings];
+          options.boot.plymouth.serpentineTheme = lib.mkOption {
+            type = lib.types.enum ["rings" "static"];
+            default = "rings";
+            description = "Which Serpentine Systems theme to use (rings or static)";
           };
 
-          environment.systemPackages = [self.packages.${system}.serpentine-rings];
+          config = {
+            boot.plymouth = {
+              enable = true;
+              theme =
+                if config.boot.plymouth.serpentineTheme == "rings"
+                then "serpentine-rings"
+                else "serpentine-static";
+              themePackages = [
+                self.packages.${system}.serpentine-rings
+                self.packages.${system}.serpentine-static
+              ];
+            };
+
+            environment.systemPackages = [
+              self.packages.${system}.serpentine-rings
+              self.packages.${system}.serpentine-static
+            ];
+          };
         };
 
         # Development shell
@@ -164,16 +240,20 @@
           shellHook = ''
             echo "Plymouth Theme Development Environment"
             echo ""
-            echo "Theme can be built with:"
+            echo "Themes can be built with:"
             echo "  nix build .#serpentine-rings"
+            echo "  nix build .#serpentine-static"
             echo ""
             echo "Preview animations with:"
             echo "  nix run .#serpentine-rings"
+            echo "  nix run .#serpentine-static"
             echo ""
             echo "Build animations with:"
             echo "  nix run .#build-serpentine-rings"
+            echo "  nix run .#build-serpentine-static"
             echo ""
             echo "Install in your NixOS configuration by importing this flake's nixosModules.default"
+            echo "and setting boot.plymouth.serpentineTheme to either 'rings' or 'static'"
             echo ""
           '';
         };
