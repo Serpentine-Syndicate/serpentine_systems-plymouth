@@ -1,8 +1,0 @@
-[Plymouth Theme]
-Name=Serpentine Systems
-Description=A monochrome theme featuring Serpentine Systems text
-ModuleName=script
-
-[script]
-ImageDir=/usr/share/plymouth/themes/serpentine
-ScriptFile=/usr/share/plymouth/themes/serpentine/serpentine.script 

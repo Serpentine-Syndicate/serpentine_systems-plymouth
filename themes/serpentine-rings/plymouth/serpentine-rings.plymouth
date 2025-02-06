@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=serpentine-rings
+Description=A monochrome theme featuring rotating Serpentine Systems text with animated rings
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/themes/serpentine-rings
+ScriptFile=/usr/share/plymouth/themes/themes/serpentine-rings/serpentine-rings.script 

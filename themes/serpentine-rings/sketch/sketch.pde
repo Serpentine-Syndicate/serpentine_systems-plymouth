@@ -213,7 +213,7 @@ void draw() {
     float fullLoop = loopDuration / baseSpeed;
     
     // Save the current frame
-    saveFrame("../src/progress-" + nf(frameCount-1, 0) + ".png");  // Save to src folder
+    saveFrame("../plymouth/progress-" + nf(frameCount-1, 0) + ".png");  // Save to plymouth folder
     println("Saving frame " + (frameCount-1));
     
     // Check if we've completed a loop
