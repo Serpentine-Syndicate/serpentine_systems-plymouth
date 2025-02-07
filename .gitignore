@@ -4,3 +4,4 @@ result/
 result
 !resources/.gitkeep
 progress-*
+# test-vm/
