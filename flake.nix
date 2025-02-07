@@ -26,6 +26,7 @@
               xvfb-run
               xorg.xorgserver
               gnused
+              imagemagick
             ];
 
             buildPhase = ''
@@ -33,11 +34,17 @@
               sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' sketch/sketch.pde
               cd sketch
               xvfb-run -a processing-java --sketch="$PWD" --run
+              cd ..
+
+              # Convert PNGs to 4-bit colormap format
+              for f in plymouth/progress-*.png; do
+                convert "$f" -depth 4 -type Grayscale -colors 16 "$f.tmp" && mv "$f.tmp" "$f"
+              done
             '';
 
             installPhase = ''
               mkdir -p $out
-              cp ../plymouth/progress-*.png $out/
+              cp plymouth/progress-*.png $out/
             '';
           };
       in {

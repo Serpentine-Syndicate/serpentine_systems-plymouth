@@ -21,11 +21,12 @@ boolean isExporting = false;
 boolean hasCompletedLoop = false;
 
 void setup() {
-  size(240, 240);  // Removed P2D, using default renderer
+  size(240, 240);  // Back to original size
   noSmooth();  // Disable anti-aliasing
   frameRate(15);  // Matched with static animation
   initLetters();  // Initialize letter patterns
   pixelDensity(1);  // Force 1:1 pixel density
+  colorMode(GRAY, 15);  // 4-bit grayscale (0-15)
 }
 
 void initLetters() {
@@ -173,7 +174,7 @@ void draw() {
   
   // Draw rings
   noStroke();
-  fill(255);
+  fill(15);  // Full white in 4-bit
   
   // Draw each ring
   for (int i = 0; i < 3; i++) {
@@ -191,7 +192,7 @@ void draw() {
   
   // Draw rotating text
   noStroke();
-  fill(255);
+  fill(15);  // Full white in 4-bit
   pushMatrix();
   float textRotation = (time * baseSpeed * textSpeedMultiplier) % TWO_PI;
   rotate(textRotation);
@@ -214,7 +215,7 @@ void draw() {
     float fullLoop = loopDuration / baseSpeed;
     
     // Save the current frame
-    saveFrame("../plymouth/progress-" + nf(frameCount-1, 0) + ".png");  // Save to plymouth folder
+    save("../plymouth/progress-" + nf(frameCount-1, 0) + ".png");
     println("Saving frame " + (frameCount-1));
     
     // Check if we've completed a loop

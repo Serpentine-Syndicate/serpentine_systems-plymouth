@@ -21,6 +21,7 @@ void setup() {
   frameRate(15);  // Changed from 30 to 15 FPS
   initLetters();  // Initialize letter patterns
   pixelDensity(1);  // Force 1:1 pixel density
+  colorMode(GRAY, 15);  // 4-bit grayscale (0-15)
 }
 
 void initLetters() {
@@ -183,7 +184,7 @@ void draw() {
                                (y + height/2) * noiseScale + time * baseSpeed * 5);
           
           int loc = screenX + screenY * width;
-          pixels[loc] = (noiseVal > 0.5) ? color(255) : color(0);
+          pixels[loc] = (noiseVal > 0.5) ? color(15) : color(0);  // Full white (15) or black (0)
         }
       }
     }
@@ -192,7 +193,7 @@ void draw() {
   
   // Draw rotating text
   noStroke();
-  fill(255);
+  fill(15);  // Full white in 4-bit
   pushMatrix();
   float textRotation = (time * baseSpeed * textSpeedMultiplier) % TWO_PI;
   rotate(textRotation);
@@ -215,7 +216,7 @@ void draw() {
     float fullLoop = loopDuration / baseSpeed;
     
     // Save the current frame
-    saveFrame("../plymouth/progress-" + nf(frameCount-1, 0) + ".png");
+    save("../plymouth/progress-" + nf(frameCount-1, 0) + ".png");
     println("Saving frame " + (frameCount-1));
     
     // Check if we've completed a loop
