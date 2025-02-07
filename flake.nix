@@ -84,12 +84,20 @@
           pname = "plymouth-theme-serpentine-rings";
           version = "0.1.0";
 
-          src = ./themes/serpentine-rings/plymouth;
+          src = ./.;
 
           # Build the animations first
           animations = buildThemeAnimations "serpentine-rings";
 
-          nativeBuildInputs = [pkgs.gnused];
+          nativeBuildInputs = with pkgs; [
+            gnused
+            plymouth
+          ];
+
+          buildPhase = ''
+            # Ensure animations are built
+            cp -r $animations/* themes/serpentine-rings/plymouth/
+          '';
 
           installPhase = ''
             runHook preInstall
@@ -98,19 +106,15 @@
             mkdir -p $out/share/plymouth/themes/serpentine-rings
 
             # Copy theme files
-            cp -r $src/* $out/share/plymouth/themes/serpentine-rings/
-
-            # Copy generated animations
-            cp -r $animations/* $out/share/plymouth/themes/serpentine-rings/
+            cp -r themes/serpentine-rings/plymouth/* $out/share/plymouth/themes/serpentine-rings/
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              # Update the ImageDir and ScriptFile paths
-              sed -i \
-                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-rings|" \
-                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-rings/serpentine-rings.script|" \
-                "$file"
+              sed -i "s@/usr/@$out/@" "$file"
             done
+
+            # Ensure correct permissions
+            chmod -R 755 $out/share/plymouth/themes/serpentine-rings
 
             runHook postInstall
           '';
@@ -129,12 +133,20 @@
           pname = "plymouth-theme-serpentine-static";
           version = "0.1.0";
 
-          src = ./themes/serpentine-static/plymouth;
+          src = ./.;
 
           # Build the animations first
           animations = buildThemeAnimations "serpentine-static";
 
-          nativeBuildInputs = [pkgs.gnused];
+          nativeBuildInputs = with pkgs; [
+            gnused
+            plymouth
+          ];
+
+          buildPhase = ''
+            # Ensure animations are built
+            cp -r $animations/* themes/serpentine-static/plymouth/
+          '';
 
           installPhase = ''
             runHook preInstall
@@ -143,19 +155,15 @@
             mkdir -p $out/share/plymouth/themes/serpentine-static
 
             # Copy theme files
-            cp -r $src/* $out/share/plymouth/themes/serpentine-static/
-
-            # Copy generated animations
-            cp -r $animations/* $out/share/plymouth/themes/serpentine-static/
+            cp -r themes/serpentine-static/plymouth/* $out/share/plymouth/themes/serpentine-static/
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              # Update the ImageDir and ScriptFile paths
-              sed -i \
-                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-static|" \
-                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-static/serpentine-static.script|" \
-                "$file"
+              sed -i "s@/usr/@$out/@" "$file"
             done
+
+            # Ensure correct permissions
+            chmod -R 755 $out/share/plymouth/themes/serpentine-static
 
             runHook postInstall
           '';
@@ -185,13 +193,9 @@
             mkdir -p $out/share/plymouth/themes
             cp -r $src/* $out/share/plymouth/themes/
 
-            # Fix paths in plymouth theme files
+            # Fix paths in plymouth theme files using simpler substitution
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              themeName=$(basename $(dirname "$file") .plymouth)
-              sed -i \
-                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/$themeName|" \
-                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/$themeName/$themeName.script|" \
-                "$file"
+              sed -i "s@/usr/@$out/@" "$file"
             done
 
             runHook postInstall
