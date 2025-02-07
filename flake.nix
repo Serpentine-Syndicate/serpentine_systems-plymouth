@@ -200,6 +200,7 @@
                 xvfb-run
                 xorg.xorgserver
                 plymouth
+                imagemagick
               ];
 
               # Create a writable copy of the source
@@ -219,6 +220,12 @@
                         sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "$theme/sketch/sketch.pde"
                         cd "$theme"
                         xvfb-run -a processing-java --sketch="$PWD/sketch" --run
+
+                        # Convert PNGs to 1-bit grayscale format
+                        for f in plymouth/progress-*.png; do
+                          convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
+                        done
+
                         cd ..
                       fi
                     done
@@ -230,6 +237,12 @@
                         sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "serpentine-$theme/sketch/sketch.pde"
                         cd "serpentine-$theme"
                         xvfb-run -a processing-java --sketch="$PWD/sketch" --run
+
+                        # Convert PNGs to 1-bit grayscale format
+                        for f in plymouth/progress-*.png; do
+                          convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
+                        done
+
                         cd ..
                       fi
                     done
