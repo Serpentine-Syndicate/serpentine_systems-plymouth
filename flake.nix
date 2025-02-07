@@ -107,8 +107,8 @@
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
               # Update the ImageDir and ScriptFile paths
               sed -i \
-                -e "s|ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-rings|" \
-                -e "s|ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-rings/serpentine-rings.script|" \
+                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-rings|" \
+                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-rings/serpentine-rings.script|" \
                 "$file"
             done
 
@@ -152,8 +152,8 @@
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
               # Update the ImageDir and ScriptFile paths
               sed -i \
-                -e "s|ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-static|" \
-                -e "s|ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-static/serpentine-static.script|" \
+                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/serpentine-static|" \
+                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/serpentine-static/serpentine-static.script|" \
                 "$file"
             done
 
@@ -187,7 +187,11 @@
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s|/usr/|$out/|" "$file"
+              themeName=$(basename $(dirname "$file") .plymouth)
+              sed -i \
+                -e "s|^ImageDir=.*|ImageDir=$out/share/plymouth/themes/$themeName|" \
+                -e "s|^ScriptFile=.*|ScriptFile=$out/share/plymouth/themes/$themeName/$themeName.script|" \
+                "$file"
             done
 
             runHook postInstall
