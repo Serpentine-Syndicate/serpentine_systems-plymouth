@@ -179,37 +179,56 @@
         };
 
         # Collection package containing all themes
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "plymouth-theme-serpentine";
-          version = "0.1.0";
+        packages.default = let
+          mkThemePackage = themes:
+            pkgs.stdenv.mkDerivation {
+              pname = "plymouth-theme-serpentine";
+              version = "0.1.0";
 
-          src = ./themes;
+              src = ./themes;
 
-          nativeBuildInputs = [pkgs.gnused];
+              nativeBuildInputs = [pkgs.gnused];
 
-          installPhase = ''
-            runHook preInstall
+              installPhase = ''
+                runHook preInstall
 
-            mkdir -p $out/share/plymouth/themes
-            cp -r $src/* $out/share/plymouth/themes/
+                mkdir -p $out/share/plymouth/themes
+                ${
+                  if themes == []
+                  then ''
+                    cp -r $src/* $out/share/plymouth/themes/
+                  ''
+                  else ''
+                    ${builtins.concatStringsSep "\n" (map (
+                        theme: "cp -r $src/serpentine-${theme} $out/share/plymouth/themes/"
+                      )
+                      themes)}
+                  ''
+                }
 
-            # Fix paths in plymouth theme files using simpler substitution
-            find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s@/usr/@$out/@" "$file"
-            done
+                # Fix paths in plymouth theme files using simpler substitution
+                find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
+                  sed -i "s@/usr/@$out/@" "$file"
+                done
 
-            runHook postInstall
-          '';
+                runHook postInstall
+              '';
 
-          meta = {
-            description = "Serpentine Systems Plymouth Theme";
-            longDescription = ''
-              A collection of Plymouth themes for Serpentine Systems featuring
-              various animations and styles.
-            '';
-            platforms = pkgs.lib.platforms.linux;
-          };
-        };
+              meta = {
+                description = "Serpentine Systems Plymouth Theme";
+                longDescription = ''
+                  A collection of Plymouth themes for Serpentine Systems featuring
+                  various animations and styles.
+                '';
+                platforms = pkgs.lib.platforms.linux;
+              };
+            };
+        in
+          {
+            __functor = self: {selected_themes ? []}:
+              mkThemePackage selected_themes;
+          }
+          // (mkThemePackage []);
 
         # NixOS module for easy theme installation
         nixosModules.default = {
