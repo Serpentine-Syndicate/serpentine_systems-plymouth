@@ -196,20 +196,27 @@
                 ${
                   if themes == []
                   then ''
-                    cp -r $src/* $out/share/plymouth/themes/
+                    for theme in $src/*; do
+                      themeName=$(basename "$theme")
+                      mkdir -p "$out/share/plymouth/themes/$themeName"
+                      cp -r "$theme/plymouth/"* "$out/share/plymouth/themes/$themeName/"
+                      for file in $(find "$out/share/plymouth/themes/$themeName" -name "*.plymouth"); do
+                        substituteInPlace "$file" \
+                          --replace "/usr/" "$out/"
+                      done
+                    done
                   ''
                   else ''
-                    ${builtins.concatStringsSep "\n" (map (
-                        theme: "cp -r $src/serpentine-${theme} $out/share/plymouth/themes/"
-                      )
-                      themes)}
+                    for theme in ${builtins.concatStringsSep " " themes}; do
+                      mkdir -p "$out/share/plymouth/themes/serpentine-$theme"
+                      cp -r "$src/serpentine-$theme/plymouth/"* "$out/share/plymouth/themes/serpentine-$theme/"
+                      for file in $(find "$out/share/plymouth/themes/serpentine-$theme" -name "*.plymouth"); do
+                        substituteInPlace "$file" \
+                          --replace "/usr/" "$out/"
+                      done
+                    done
                   ''
                 }
-
-                # Fix paths in plymouth theme files using simpler substitution
-                find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-                  sed -i "s@/usr/@$out/@" "$file"
-                done
 
                 runHook postInstall
               '';
