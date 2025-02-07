@@ -1,6 +1,6 @@
 // Animation parameters
 float time = 0;
-float baseSpeed = 0.005;  // Base speed for all rotations
+float baseSpeed = 0.025;  // Matched with static animation
 // Calculate loop duration based on text rotation
 // We want the text to make a complete rotation and return to its starting position
 float loopDuration = TWO_PI;  // One complete rotation
@@ -23,6 +23,7 @@ boolean hasCompletedLoop = false;
 void setup() {
   size(240, 240);  // Removed P2D, using default renderer
   noSmooth();  // Disable anti-aliasing
+  frameRate(15);  // Matched with static animation
   initLetters();  // Initialize letter patterns
   pixelDensity(1);  // Force 1:1 pixel density
 }

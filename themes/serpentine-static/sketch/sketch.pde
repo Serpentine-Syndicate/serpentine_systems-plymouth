@@ -1,6 +1,6 @@
 // Animation parameters
 float time = 0;
-float baseSpeed = 0.005;  // Base speed for all rotations
+float baseSpeed = 0.025;  // Reduced speed (was 0.05)
 float loopDuration = TWO_PI;  // One complete rotation
 float staticRadius = 70;  // Slightly smaller radius for the static circle
 String text = "SERPENTINESYSTEMS";  // Uppercase for simpler pixel patterns
@@ -18,7 +18,7 @@ boolean hasCompletedLoop = false;
 void setup() {
   size(240, 240);  // Back to original size
   noSmooth();  // Disable anti-aliasing
-  frameRate(30);
+  frameRate(15);  // Changed from 30 to 15 FPS
   initLetters();  // Initialize letter patterns
   pixelDensity(1);  // Force 1:1 pixel density
 }
