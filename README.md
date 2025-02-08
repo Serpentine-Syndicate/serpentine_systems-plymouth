@@ -1,73 +1,67 @@
 **Warning: Using this repo for some reason bloats the `initrd` quite a bit (up to 50 MB). Use it with [boot.loader.systemd-boot.configurationLimit](https://search.nixos.org/options?channel=23.05&show=boot.loader.systemd-boot.configurationLimit&from=0&size=50&sort=relevance&type=packages&query=systemd-boot) or a `/boot` of at least a gigabyte.
 On EFI Systems it's also possible to keep the initrd on the main partition when switching to Grub. Checkout the [nixos wiki](https://wiki.nixos.org/wiki/Bootloader#Keeping_kernels/initrd_on_the_main_partition).**
 
+# Serpentine Systems Plymouth Theme
 
-This repo contains a plymouth theme for Nixos, thanks to [discourse](https://discourse.nixos.org/t/genix7000-nix-project-logo-generator/15937/9) for giving me motivation.
+A sleek Plymouth boot animation theme for NixOS, featuring the Serpentine Systems logo.
 
-# Install
+## Installation
 
-The package is currently not in nixpkgs. 
-
-## Flakes
-
-You can include it in your `flakes.nix` like this:
+This theme is available as a Nix flake. Add it to your `flake.nix`:
 
 ```nix
 {
-  inputs.nixos-boot.url = "github:Melkor333/nixos-boot";
-  outputs = { self, nixpkgs, nixos-boot }:
-  {
+  inputs.serpentine-boot.url = "github:00x29a/serpentine_systems-plymouth";
+  
+  outputs = { self, nixpkgs, serpentine-boot }: {
     nixosConfigurations."<hostname>" = nixpkgs.lib.nixosSystem {
-      modules = [ nixos-boot.nixosModules.default ./configuration.nix ];
-      system  = "x86_64-linux";
+      modules = [ 
+        serpentine-boot.nixosModules.default 
+        ./configuration.nix 
+      ];
+      system = "x86_64-linux";
     };
   };
-}
-
-```
-
-
-## Non Flakes
-
-You can include it in your `configuration.nix` like this:
-
-``` nix
-{ config, lib, pkgs, ...}:
-let
-  # Fetch the repository
-  nixos-boot-src = pkgs.fetchFromGitHub {
-    owner = "Melkor333";
-    repo = "nixos-boot";
-    rev = "main";
-    sha256 = "sha256-Dj8LhVTOrHEnqgONbCEKIEyglO7zQej+KS08faO9NJk=";
-  };
-in
-{
-  imports = [ "${nixos-boot-src}/modules.nix" ];
 }
 ```
 
 ## Configuration
 
-Enable nixos-boot in your configuration:
+Enable the theme in your NixOS configuration:
 
 ```nix
-{ config, lib, pkgs, ...}:
 {
-  # ...
-  nixos-boot = {
-    enable  = true;
-
-    # Different colors
-    # bgColor.red   = 100; # 0 - 255
-    # bgColor.green = 100; # 0 - 255
-    # bgColor.blue  = 100; # 0 - 255
-
-    # If you want to make sure the theme is seen when your computer starts too fast
-    # duration = 3; # in seconds
+  serpentine-boot = {
+    enable = true;
+    
+    # Optional: Customize background color (RGB values 0-255)
+    # Default is black (0,0,0)
+    # bgColor = {
+    #   red = 128;    # 0-255
+    #   green = 0;    # 0-255
+    #   blue = 128;   # 0-255
+    # };
+    
+    # Optional: Set minimum display duration (in seconds)
+    # duration = 3.0;
   };
 }
 ```
+
+## Background Color Examples
+
+You can customize the background color using RGB values (0-255):
+- Black (default): `{red = 0; green = 0; blue = 0;}`
+- White: `{red = 255; green = 255; blue = 255;}`
+- Purple: `{red = 128; green = 0; blue = 128;}`
+- Dark Blue: `{red = 0; green = 0; blue = 77;}`
+
+## Development
+
+The theme uses Plymouth's script system for animations. The main components are:
+- `serpentinesystems.plymouth`: Theme configuration
+- `serpentinesystems.script`: Animation script
+- PNG frames for the animation sequence
 
 # Themes
 

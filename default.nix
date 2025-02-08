@@ -2,7 +2,7 @@
   pkgs ? import <nixpkgs> {},
   theme ? "load_unload",
   # TODO: Should be a list when more themes come
-  bgColor ? "1, 1, 1",
+  bgColor ? "0, 0, 0",
   # rgb value between 0-1. TODO: Write hex to plymouth magic
 }:
 pkgs.stdenv.mkDerivation {
@@ -24,15 +24,10 @@ pkgs.stdenv.mkDerivation {
     sed -i 's/THEME/${theme}/g' "${theme}/${theme}.plymouth"
     sed -i 's/generic/${theme}/g' "${theme}/${theme}.plymouth"
     # Set the Background Color
-    cp generic.script ${theme}
-    sed -i 's/\(Window\.SetBackground[^ ]*\).*/\1 (${bgColor});/' ${theme}/generic.script
+    sed -i 's/\(Window\.SetBackground[^ ]*\).*/\1 (${bgColor});/' ${theme}/${theme}.script
   '';
 
   installPhase = ''
-    # Set the Background Color
-    cp generic.script ${theme}
-    sed -i 's/\(Window\.SetBackground[^ ]*\).*/\1 (${bgColor});/' ${theme}/generic.script
-
     # Copy files
     install -m 755 -vDt "$out/share/plymouth/themes/${theme}" "${theme}/${theme}."{plymouth,script}
     install -m 644 -vDt "$out/share/plymouth/themes/${theme}" "${theme}/"*png
