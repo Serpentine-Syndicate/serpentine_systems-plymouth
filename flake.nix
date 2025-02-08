@@ -315,9 +315,9 @@
           ...
         }: {
           options.boot.plymouth.serpentineTheme = lib.mkOption {
-            type = lib.types.enum ["rings" "static"];
+            type = lib.types.enum ["rings" "static" "test"];
             default = "rings";
-            description = "Which Serpentine Systems theme to use (rings or static)";
+            description = "Which Serpentine Systems theme to use (rings, static, or test)";
           };
 
           config = {
@@ -326,16 +326,20 @@
               theme =
                 if config.boot.plymouth.serpentineTheme == "rings"
                 then "serpentine-rings"
-                else "serpentine-static";
+                else if config.boot.plymouth.serpentineTheme == "static"
+                then "serpentine-static"
+                else "serpentine-test";
               themePackages = [
-                self.packages.${system}.serpentine-rings
-                self.packages.${system}.serpentine-static
+                (self.packages.${system}.default {
+                  selected_themes = ["rings" "static" "test"];
+                })
               ];
             };
 
             environment.systemPackages = [
-              self.packages.${system}.serpentine-rings
-              self.packages.${system}.serpentine-static
+              (self.packages.${system}.default {
+                selected_themes = ["rings" "static" "test"];
+              })
             ];
           };
         };
@@ -365,7 +369,7 @@
             echo "  nix run .#build-serpentine-static"
             echo ""
             echo "Install in your NixOS configuration by importing this flake's nixosModules.default"
-            echo "and setting boot.plymouth.serpentineTheme to either 'rings' or 'static'"
+            echo "and setting boot.plymouth.serpentineTheme to either 'rings', 'static', or 'test'"
             echo ""
           '';
         };
