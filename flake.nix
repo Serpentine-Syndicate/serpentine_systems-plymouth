@@ -37,14 +37,14 @@
               cd ..
 
               # Convert PNGs to 4-bit colormap format
-              for f in plymouth/progress-*.png; do
+              for f in progress-*.png; do
                 convert "$f" -depth 4 -type Grayscale -colors 16 "$f.tmp" && mv "$f.tmp" "$f"
               done
             '';
 
             installPhase = ''
               mkdir -p $out
-              cp plymouth/progress-*.png $out/
+              cp progress-*.png $out/
             '';
           };
       in {
@@ -103,7 +103,7 @@
 
           buildPhase = ''
             # Ensure animations are built
-            cp -r $animations/* themes/serpentine-rings/plymouth/
+            cp -r $animations/* themes/serpentine-rings/
           '';
 
           installPhase = ''
@@ -113,7 +113,7 @@
             mkdir -p $out/share/plymouth/themes/serpentine-rings
 
             # Copy theme files
-            cp -r themes/serpentine-rings/plymouth/* $out/share/plymouth/themes/serpentine-rings/
+            cp -r themes/serpentine-rings/* $out/share/plymouth/themes/serpentine-rings/
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
@@ -152,7 +152,7 @@
 
           buildPhase = ''
             # Ensure animations are built
-            cp -r $animations/* themes/serpentine-static/plymouth/
+            cp -r $animations/* themes/serpentine-static/
           '';
 
           installPhase = ''
@@ -162,7 +162,7 @@
             mkdir -p $out/share/plymouth/themes/serpentine-static
 
             # Copy theme files
-            cp -r themes/serpentine-static/plymouth/* $out/share/plymouth/themes/serpentine-static/
+            cp -r themes/serpentine-static/* $out/share/plymouth/themes/serpentine-static/
 
             # Fix paths in plymouth theme files
             find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
@@ -201,50 +201,6 @@
 
               dontBuild = true;
 
-              buildPhase = ''
-                ${
-                  if themes == []
-                  then ''
-                    for theme in *; do
-                      if [ -d "$theme" ]; then
-                        if [ -d "$theme/sketch" ]; then
-                          # Set isExporting to true for the build
-                          sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "$theme/sketch/sketch.pde"
-                          cd "$theme"
-                          xvfb-run -a processing-java --sketch="$PWD/sketch" --run
-
-                          # Convert PNGs to 1-bit grayscale format
-                          for f in plymouth/progress-*.png; do
-                            convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
-                          done
-
-                          cd ..
-                        fi
-                      fi
-                    done
-                  ''
-                  else ''
-                    for theme in ${builtins.concatStringsSep " " themes}; do
-                      if [ -d "serpentine-$theme" ]; then
-                        if [ -d "serpentine-$theme/sketch" ]; then
-                          # Set isExporting to true for the build
-                          sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "serpentine-$theme/sketch/sketch.pde"
-                          cd "serpentine-$theme"
-                          xvfb-run -a processing-java --sketch="$PWD/sketch" --run
-
-                          # Convert PNGs to 1-bit grayscale format
-                          for f in plymouth/progress-*.png; do
-                            convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
-                          done
-
-                          cd ..
-                        fi
-                      fi
-                    done
-                  ''
-                }
-              '';
-
               installPhase = ''
                 runHook preInstall
 
@@ -252,36 +208,32 @@
                 ${
                   if themes == []
                   then ''
-                    for theme in *; do
+                    # Install all themes
+                    for theme in serpentine-*; do
                       if [ -d "$theme" ]; then
-                        mkdir -p "$out/share/plymouth/themes/$theme"
-                        # Copy plymouth and script files
-                        cp -f "$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/$theme/" 2>/dev/null || true
-                        # Copy the progress images
-                        cp -f "$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/$theme/" 2>/dev/null || true
-                        for file in $(find "$out/share/plymouth/themes/$theme" -name "*.plymouth"); do
-                          substituteInPlace "$file" \
-                            --replace "/usr/" "$out/"
-                        done
+                        theme_name=$(basename "$theme")
+                        mkdir -p "$out/share/plymouth/themes/$theme_name"
+                        cp -r "$theme/"* "$out/share/plymouth/themes/$theme_name/"
                       fi
                     done
                   ''
                   else ''
+                    # Install selected themes
                     for theme in ${builtins.concatStringsSep " " themes}; do
                       if [ -d "serpentine-$theme" ]; then
                         mkdir -p "$out/share/plymouth/themes/serpentine-$theme"
-                        # Copy plymouth and script files
-                        cp -f "serpentine-$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/serpentine-$theme/" 2>/dev/null || true
-                        # Copy the progress images
-                        cp -f "serpentine-$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/serpentine-$theme/" 2>/dev/null || true
-                        for file in $(find "$out/share/plymouth/themes/serpentine-$theme" -name "*.plymouth"); do
-                          substituteInPlace "$file" \
-                            --replace "/usr/" "$out/"
-                        done
+                        cp -r "serpentine-$theme/"* "$out/share/plymouth/themes/serpentine-$theme/"
                       fi
                     done
                   ''
                 }
+
+                # Fix paths in plymouth theme files
+                find $out/share/plymouth/themes -name "*.plymouth" -type f -exec \
+                  sed -i "s@/usr/@$out/@g" {} \;
+
+                # Ensure correct permissions
+                chmod -R 755 $out/share/plymouth/themes
 
                 runHook postInstall
               '';
