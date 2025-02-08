@@ -196,19 +196,10 @@
 
               nativeBuildInputs = with pkgs; [
                 gnused
-                processing
-                xvfb-run
-                xorg.xorgserver
                 plymouth
-                imagemagick
               ];
 
-              # Create a writable copy of the source
-              unpackPhase = ''
-                cp -r $src ./themes
-                chmod -R +w ./themes
-                cd themes
-              '';
+              dontBuild = true;
 
               buildPhase = ''
                 ${
