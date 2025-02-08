@@ -212,6 +212,8 @@
                         theme_name=$(basename "$theme")
                         mkdir -p "$out/share/plymouth/themes/$theme_name"
                         cp -r "$theme/"* "$out/share/plymouth/themes/$theme_name/"
+                        substituteInPlace "$out/share/plymouth/themes/$theme_name/$theme_name.plymouth" \
+                          --replace-fail "/usr/" "$out/"
                       fi
                     done
                   ''
@@ -221,6 +223,8 @@
                       if [ -d "serpentine-$theme" ]; then
                         mkdir -p "$out/share/plymouth/themes/serpentine-$theme"
                         cp -r "serpentine-$theme/"* "$out/share/plymouth/themes/serpentine-$theme/"
+                        substituteInPlace "$out/share/plymouth/themes/serpentine-$theme/serpentine-$theme.plymouth" \
+                          --replace-fail "/usr/" "$out/"
                       fi
                     done
                   ''
