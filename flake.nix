@@ -56,7 +56,7 @@
             sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' themes/serpentine-rings/sketch/sketch.pde
             cd themes/serpentine-rings && ${pkgs.xvfb-run}/bin/xvfb-run -a ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
             # Reset isExporting back to false
-            sed -i 's/boolean isExporting = true;/boolean isExporting = false;/' themes/serpentine-rings/sketch/sketch.pde
+            sed -i 's/boolean isExporting = true;/boolean isExporting = false;/' sketch/sketch.pde
           '');
         };
 

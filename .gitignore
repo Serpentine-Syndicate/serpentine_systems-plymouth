@@ -3,5 +3,5 @@ references/
 result/
 result
 !resources/.gitkeep
-progress-*
+# progress-*
 # test-vm/

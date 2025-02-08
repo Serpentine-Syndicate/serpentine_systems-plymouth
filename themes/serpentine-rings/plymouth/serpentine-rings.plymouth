@@ -1,6 +1,7 @@
 [Plymouth Theme]
 Name=serpentine-rings
 Description=A monochrome theme featuring rotating Serpentine Systems text with animated rings
+Comment=Created by olyn (00x29a)
 ModuleName=script
 
 [script]
