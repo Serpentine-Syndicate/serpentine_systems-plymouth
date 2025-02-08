@@ -116,9 +116,8 @@
             cp -r themes/serpentine-rings/* $out/share/plymouth/themes/serpentine-rings/
 
             # Fix paths in plymouth theme files
-            find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s@/usr/@$out/@" "$file"
-            done
+            substituteInPlace $out/share/plymouth/themes/serpentine-rings/serpentine-rings.plymouth \
+              --replace-fail "/usr/" "$out/"
 
             # Ensure correct permissions
             chmod -R 755 $out/share/plymouth/themes/serpentine-rings
@@ -165,9 +164,8 @@
             cp -r themes/serpentine-static/* $out/share/plymouth/themes/serpentine-static/
 
             # Fix paths in plymouth theme files
-            find $out/share/plymouth/themes -name "*.plymouth" -type f | while read -r file; do
-              sed -i "s@/usr/@$out/@" "$file"
-            done
+            substituteInPlace $out/share/plymouth/themes/serpentine-static/serpentine-static.plymouth \
+              --replace-fail "/usr/" "$out/"
 
             # Ensure correct permissions
             chmod -R 755 $out/share/plymouth/themes/serpentine-static
@@ -230,7 +228,7 @@
 
                 # Fix paths in plymouth theme files
                 find $out/share/plymouth/themes -name "*.plymouth" -type f -exec \
-                  sed -i "s@/usr/@$out/@g" {} \;
+                  substituteInPlace {} --replace-fail "/usr/" "$out/" \;
 
                 # Ensure correct permissions
                 chmod -R 755 $out/share/plymouth/themes
