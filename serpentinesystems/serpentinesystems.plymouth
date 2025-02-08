@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=serpentinesystems
+Description=A monochrome theme featuring rotating Serpentine Systems text with static filled circle
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/serpentinesystems
+ScriptFile=/usr/share/plymouth/themes/serpentinesystems/serpentinesystems.script 

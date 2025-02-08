@@ -17,14 +17,14 @@
       in {
         packages.default = pkgs.stdenvNoCC.mkDerivation {
           pname = "plymouth-theme-serpentine-systems";
-          version = "0.1.0";
+          version = "0.2.0";
 
-          src = ./serpentine-systems;
+          src = ./serpentinesystems;
 
-          nativeBuildInputs = with pkgs; [
-            gnused
-            plymouth
-          ];
+          # nativeBuildInputs = with pkgs; [
+          #   gnused
+          #   plymouth
+          # ];
 
           dontBuild = true;
 
@@ -32,17 +32,17 @@
             runHook preInstall
 
             # Create theme directory
-            mkdir -p $out/share/plymouth/themes/serpentine-systems
+            mkdir -p $out/share/plymouth/themes/serpentinesystems
 
             # Copy theme files
-            cp -r * $out/share/plymouth/themes/serpentine-systems/
+            cp -r * $out/share/plymouth/themes/serpentinesystems/
 
             # Fix paths in plymouth theme files
-            substituteInPlace $out/share/plymouth/themes/serpentine-systems/serpentine-systems.plymouth \
+            substituteInPlace $out/share/plymouth/themes/serpentinesystems/serpentinesystems.plymouth \
               --replace-fail "/usr/" "$out/"
 
             # Ensure correct permissions
-            chmod -R 755 $out/share/plymouth/themes/serpentine-systems
+            chmod -R 755 $out/share/plymouth/themes/serpentinesystems
 
             runHook postInstall
           '';
@@ -60,8 +60,8 @@
             type = "app";
             program = toString (pkgs.writeShellScript "build-assets" ''
               # Temporarily set isExporting to true
-              sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' serpentine-systems/sketch/sketch.pde
-              cd serpentine-systems && ${pkgs.xvfb-run}/bin/xvfb-run -a ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
+              sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' serpentinesystems/sketch/sketch.pde
+              cd serpentinesystems && ${pkgs.xvfb-run}/bin/xvfb-run -a ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
               # Reset isExporting back to false
               sed -i 's/boolean isExporting = true;/boolean isExporting = false;/' sketch/sketch.pde
             '');
@@ -71,7 +71,7 @@
           preview = {
             type = "app";
             program = toString (pkgs.writeShellScript "preview" ''
-              cd serpentine-systems && ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
+              cd serpentinesystems && ${pkgs.processing}/bin/processing-java --sketch="$PWD/sketch" --run
             '');
           };
         };
@@ -79,7 +79,6 @@
         # Development shell
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            plymouth
             processing
             xvfb-run
             xorg.xorgserver
