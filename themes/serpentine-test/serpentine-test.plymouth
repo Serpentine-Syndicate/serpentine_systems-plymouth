@@ -6,4 +6,4 @@ ModuleName=script
 
 [script]
 ImageDir=/usr/share/plymouth/themes/serpentine-test
-ScriptFile=/usr/share/plymouth/themes/seal/serpentine-test.script
+ScriptFile=/usr/share/plymouth/themes/serpentine-test/serpentine-test.script
