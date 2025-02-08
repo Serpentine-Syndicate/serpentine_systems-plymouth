@@ -216,34 +216,38 @@
                   then ''
                     for theme in *; do
                       if [ -d "$theme" ]; then
-                        # Set isExporting to true for the build
-                        sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "$theme/sketch/sketch.pde"
-                        cd "$theme"
-                        xvfb-run -a processing-java --sketch="$PWD/sketch" --run
+                        if [ -d "$theme/sketch" ]; then
+                          # Set isExporting to true for the build
+                          sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "$theme/sketch/sketch.pde"
+                          cd "$theme"
+                          xvfb-run -a processing-java --sketch="$PWD/sketch" --run
 
-                        # Convert PNGs to 1-bit grayscale format
-                        for f in plymouth/progress-*.png; do
-                          convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
-                        done
+                          # Convert PNGs to 1-bit grayscale format
+                          for f in plymouth/progress-*.png; do
+                            convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
+                          done
 
-                        cd ..
+                          cd ..
+                        fi
                       fi
                     done
                   ''
                   else ''
                     for theme in ${builtins.concatStringsSep " " themes}; do
                       if [ -d "serpentine-$theme" ]; then
-                        # Set isExporting to true for the build
-                        sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "serpentine-$theme/sketch/sketch.pde"
-                        cd "serpentine-$theme"
-                        xvfb-run -a processing-java --sketch="$PWD/sketch" --run
+                        if [ -d "serpentine-$theme/sketch" ]; then
+                          # Set isExporting to true for the build
+                          sed -i 's/boolean isExporting = false;/boolean isExporting = true;/' "serpentine-$theme/sketch/sketch.pde"
+                          cd "serpentine-$theme"
+                          xvfb-run -a processing-java --sketch="$PWD/sketch" --run
 
-                        # Convert PNGs to 1-bit grayscale format
-                        for f in plymouth/progress-*.png; do
-                          convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
-                        done
+                          # Convert PNGs to 1-bit grayscale format
+                          for f in plymouth/progress-*.png; do
+                            convert "$f" -colorspace gray -colors 2 -depth 1 -type palette PNG8:"$f.tmp" && mv "$f.tmp" "$f"
+                          done
 
-                        cd ..
+                          cd ..
+                        fi
                       fi
                     done
                   ''
@@ -261,9 +265,9 @@
                       if [ -d "$theme" ]; then
                         mkdir -p "$out/share/plymouth/themes/$theme"
                         # Copy plymouth and script files
-                        cp "$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/$theme/"
-                        # Copy the generated progress images
-                        cp "$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/$theme/"
+                        cp -f "$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/$theme/" 2>/dev/null || true
+                        # Copy the progress images
+                        cp -f "$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/$theme/" 2>/dev/null || true
                         for file in $(find "$out/share/plymouth/themes/$theme" -name "*.plymouth"); do
                           substituteInPlace "$file" \
                             --replace "/usr/" "$out/"
@@ -276,9 +280,9 @@
                       if [ -d "serpentine-$theme" ]; then
                         mkdir -p "$out/share/plymouth/themes/serpentine-$theme"
                         # Copy plymouth and script files
-                        cp "serpentine-$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/serpentine-$theme/"
-                        # Copy the generated progress images
-                        cp "serpentine-$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/serpentine-$theme/"
+                        cp -f "serpentine-$theme/plymouth/"*.{plymouth,script} "$out/share/plymouth/themes/serpentine-$theme/" 2>/dev/null || true
+                        # Copy the progress images
+                        cp -f "serpentine-$theme/plymouth/progress-"*.png "$out/share/plymouth/themes/serpentine-$theme/" 2>/dev/null || true
                         for file in $(find "$out/share/plymouth/themes/serpentine-$theme" -name "*.plymouth"); do
                           substituteInPlace "$file" \
                             --replace "/usr/" "$out/"
