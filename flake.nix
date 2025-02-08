@@ -1,17 +1,7 @@
 {
   description = "Serpentine Systems Plymouth Theme";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
-    flake-utils.url = "github:numtide/flake-utils";
+  outputs = inputs: {
+    nixosModules.default = ./modules.nix;
   };
-
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-  }:
-    flake-utils.lib.eachDefaultSystem (system: {
-      nixosModules.default = import ./modules.nix;
-    });
 }
